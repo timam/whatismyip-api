@@ -1,0 +1,6 @@
+.idea
+bin/*
+info.log
+pkg/*
+src/github.com/
+src/golang.org/

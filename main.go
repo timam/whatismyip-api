@@ -4,9 +4,19 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 )
 
-const portNumber = ":8080"
+
+
+func applicationPort() string {
+	if port, ok := os.LookupEnv("PORT"); ok {
+		return port
+	}
+	return "8080"
+}
+
+
 
 func ReadUserIP(r *http.Request) string {
 	IPAddress := r.Header.Get("X-Real-Ip")
@@ -26,8 +36,8 @@ func UserInternetProtocolDetails(w http.ResponseWriter, r *http.Request)  {
 }
 
 func main()  {
+	portNumber :=  applicationPort()
 	fmt.Println(fmt.Sprintf("Application started at port %s", portNumber))
-
 	http.HandleFunc("/", UserInternetProtocolDetails)
-	_ = http.ListenAndServe(portNumber, nil)
+	log.Fatal(http.ListenAndServe(":" +portNumber , nil))
 }

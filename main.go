@@ -1,13 +1,16 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 )
 
-
+type IPAddr struct {
+	ClientIPAddr string `json:"client_ip_addr"`
+}
 
 func applicationPort() string {
 	if port, ok := os.LookupEnv("PORT"); ok {
@@ -31,8 +34,15 @@ func ReadUserIP(r *http.Request) string {
 
 func UserInternetProtocolDetails(w http.ResponseWriter, r *http.Request)  {
 	ipAddr := ReadUserIP(r)
+	jsonIP, _ := json.Marshal(IPAddr{
+		ClientIPAddr: ipAddr,
+	})
+
 	log.Printf("Request from :%s\n", ipAddr)
-	_, _ = fmt.Fprintf(w, ipAddr)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Write(jsonIP)
 }
 
 func main()  {

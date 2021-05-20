@@ -2,14 +2,13 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
 )
 
-type IPAddr struct {
-	ClientIPAddr string `json:"client_ip_addr"`
+type publicIPAddr struct {
+	PublicIP string `json:"public_ip"`
 }
 
 func applicationPort() string {
@@ -19,9 +18,7 @@ func applicationPort() string {
 	return "8080"
 }
 
-
-
-func ReadUserIP(r *http.Request) string {
+func readUserIP(r *http.Request) string {
 	IPAddress := r.Header.Get("X-Real-Ip")
 	if IPAddress == "" {
 		IPAddress = r.Header.Get("X-Forwarded-For")
@@ -32,22 +29,22 @@ func ReadUserIP(r *http.Request) string {
 	return IPAddress
 }
 
-func UserInternetProtocolDetails(w http.ResponseWriter, r *http.Request)  {
-	ipAddr := ReadUserIP(r)
-	jsonIP, _ := json.Marshal(IPAddr{
-		ClientIPAddr: ipAddr,
-	})
+func userPublicIP(w http.ResponseWriter, r *http.Request)  {
+	ip := readUserIP(r)
 
-	log.Printf("Request from :%s\n", ipAddr)
+	response, _ := json.Marshal(publicIPAddr{
+		PublicIP: ip,
+	})
+	log.Printf("Request from :%s\n", ip)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Write(jsonIP)
+	w.Write(response)
 }
 
 func main()  {
 	portNumber :=  applicationPort()
-	fmt.Println(fmt.Sprintf("Application started at port %s", portNumber))
-	http.HandleFunc("/", UserInternetProtocolDetails)
+	log.Printf("Application started at port %s", portNumber)
+	http.HandleFunc("/", userPublicIP)
 	log.Fatal(http.ListenAndServe(":" +portNumber , nil))
 }
